@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import csv
+import re
 from difflib import SequenceMatcher
 
 
@@ -23,11 +25,12 @@ class Matcher:
         with open(self.rfilepath, "r", newline="") as file:
             reader = csv.reader(file, delimiter=';')
             for row1 in reader:
-                self.__dictdb[row1[1]] = row1[0]
+                self.__dictdb[row1[0]] = row1[1]
         with open(self.rfilepath1, "r", newline="") as file:
             reader = csv.reader(file, delimiter=';')
             for row2 in reader:
-                curpos = row2[0]
+                temp = re.sub(r"[#()./|i*®^ї'%і_\-$!~=\"]", "", row2[0].lower())
+                curpos = temp.strip()
                 if curpos in self.__dictdb:
                     continue
                 else:
@@ -38,7 +41,7 @@ class Matcher:
                     print(curpos, " = ", self.__dictdb[mlist[0][1]], "?")
                     uinput1 = input()
                     if uinput1 == "y":
-                        data = [self.__dictdb[mlist[0][1]], curpos]
+                        data = [curpos, self.__dictdb[mlist[0][1]]]
                         self.__csv_writer(self, data)
                         print("ok")
                     else:
@@ -49,12 +52,12 @@ class Matcher:
                               self.__dictdb[mlist[3][1]])
                         uinput2 = input()
                         if uinput2 == "1" or uinput2 == "2" or uinput2 == "3":
-                            data = [dictemp.get(uinput2), curpos]
+                            data = [curpos, dictemp.get(uinput2)]
                             self.__csv_writer(self, data)
                             print("ok")
                         else:
                             print("insert your own:")
                             uinput3 = input()
-                            data = [uinput3, curpos]
+                            data = [curpos, uinput3]
                             self.__csv_writer(self, data)
                             print("ok")
