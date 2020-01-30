@@ -8,6 +8,7 @@ from difflib import SequenceMatcher
 import openpyxl
 import xlrd
 from xlsxwriter import Workbook
+from openpyxl import Workbook
 
 
 def fix_xlsx(in_file):
@@ -53,6 +54,58 @@ class Matcher:
                 return True
             except ValueError:
                 return False
+
+    @staticmethod
+    def __is_garbage(string):
+        digit = 0
+        non_digit = 0
+        for i in string:
+            if i.isdigit():
+                digit += 1
+            else:
+                non_digit += 1
+        if digit / (digit + non_digit) > 0.4:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def __response_handler(curpos, mlist):
+        try:
+            while len(mlist) < 4:
+                mlist.append([0, "Error"])
+            print(curpos, " = ", Matcher.__dictdb[mlist[0][1]], "?")
+            uinput1 = input()
+            if uinput1 == "y":
+                data = [curpos, Matcher.__dictdb[mlist[0][1]]]
+                Matcher.__csv_writer(Matcher.__rfilepath, data)
+                Matcher.__dictdb[curpos] = data[1]
+                print("ok")
+            elif uinput1 == "garb":
+                Matcher.__csv_writer(Matcher.__rfilepath2, [curpos])
+                Matcher.__dictallbd[curpos] = curpos
+                print("added to garbage")
+            else:
+                dictemp = {"1": Matcher.__dictdb[mlist[1][1]],
+                           "2": Matcher.__dictdb[mlist[2][1]],
+                           "3": Matcher.__dictdb[mlist[3][1]]}
+                print("choose one: \n", Matcher.__dictdb[mlist[1][1]], '\n', Matcher.__dictdb[mlist[2][1]], '\n',
+                      Matcher.__dictdb[mlist[3][1]])
+                uinput2 = input()
+                if uinput2 == "1" or uinput2 == "2" or uinput2 == "3":
+                    data = [curpos, dictemp.get(uinput2)]
+                    Matcher.__csv_writer(Matcher.__rfilepath, data)
+                    Matcher.__dictdb[curpos] = data[1]
+                    print("ok")
+                else:
+                    print("insert your own:")
+                    uinput3 = input()
+                    data = [curpos, uinput3]
+                    Matcher.__csv_writer(Matcher.__rfilepath, data)
+                    Matcher.__dictdb[curpos] = data[1]
+                    print("ok")
+        except IndexError:
+            print("list out of bonds")
 
     @staticmethod
     def __csv_from_excel(filename, datapath):  # read from datapath; write to filename
@@ -103,30 +156,49 @@ class Matcher:
         Matcher.__directory = directory
 
     @staticmethod
+    def setreportsdirectory(directory):
+        Matcher.__reportsdirectory = directory
+
+    @staticmethod
     def match(rpath, wpath):  # read form rpath and write to wpath with renamed drugs
         with open(rpath, "r", newline="") as file:
             reader = csv.reader(file, delimiter=';', quotechar='"')
             for row2 in reader:
                 for i in range(len(row2)):
                     word = row2[i]
+                    if Matcher.__is_digit(word):
+                        word = word.replace('.', ',')
+                        row2[i] = word
                     temp = re.sub(r"[#()./|i*®^ї'%і_\-$!~=\"]", "", word.lower())
                     curpos = temp.strip()
-                    if Matcher.__is_digit(curpos) or curpos == "" or (curpos in Matcher.__dictallbd):
-                        continue
-                    elif curpos in Matcher.__dictdb:
+                    if curpos in Matcher.__dictdb:
                         row2[i] = Matcher.__dictdb[curpos]
+                    elif Matcher.__is_digit(curpos) or curpos == "" or (
+                            curpos in Matcher.__dictallbd) or Matcher.__is_garbage(curpos):
+                        continue
+                    else:
+                        mlist = []
+                        for k in Matcher.__dictdb:
+                            a = SequenceMatcher(None, curpos, k).ratio()
+                            if a > 0.6:
+                                mlist.append([a, k])
+                        if len(mlist) == 0:
+                            Matcher.__csv_writer(Matcher.__rfilepath2, [curpos])
+                            Matcher.__dictallbd[curpos] = curpos
+                        if len(mlist) != 0:
+                            mlist.sort(reverse=True)
+                            Matcher.__response_handler(curpos, mlist)
                 Matcher.__csv_writer(wpath, row2)
 
     @staticmethod
     def __exelwriter(csvfile):  # creates same named as csvfile xlsx and write data to it
-        workbook = Workbook(Matcher.__reportsdirectory + csvfile[:-3] + '.xlsx')
-        worksheet = workbook.add_worksheet()
+        wb = Workbook(Matcher.__reportsdirectory + csvfile[:-3] + '.xlsx')
+        ws = wb.create_sheet("kaban")
         with open(csvfile, 'rt', newline="") as f:
             reader = csv.reader(f, delimiter=';')
-            for r, row in enumerate(reader):
-                for c, col in enumerate(row):
-                    worksheet.write(r, c, col)
-        workbook.close()
+            for subarray in reader:
+                ws.append(subarray)
+        wb.save(Matcher.__reportsdirectory + csvfile[:-3] + '.xlsx')
 
     def rename_drugs(self):  # unites some methods:
         with open(self.__rfilepath, "r", newline="") as file:  # create drugs dict
@@ -168,29 +240,4 @@ class Matcher:
                     for i in self.__dictdb:
                         mlist.append([SequenceMatcher(None, curpos, i).ratio(), i])
                     mlist.sort(reverse=True)
-                    print(curpos, " = ", self.__dictdb[mlist[0][1]], "?")
-                    uinput1 = input()
-                    if uinput1 == "y":
-                        data = [curpos, self.__dictdb[mlist[0][1]]]
-                        self.__csv_writer(self.__rfilepath, data)
-                        self.__dictdb[curpos] = data[1]
-                        print("ok")
-                    else:
-                        dictemp = {"1": self.__dictdb[mlist[1][1]],
-                                   "2": self.__dictdb[mlist[2][1]],
-                                   "3": self.__dictdb[mlist[3][1]]}
-                        print("choose one: \n", self.__dictdb[mlist[1][1]], '\n', self.__dictdb[mlist[2][1]], '\n',
-                              self.__dictdb[mlist[3][1]])
-                        uinput2 = input()
-                        if uinput2 == "1" or uinput2 == "2" or uinput2 == "3":
-                            data = [curpos, dictemp.get(uinput2)]
-                            self.__csv_writer(self.__rfilepath, data)
-                            self.__dictdb[curpos] = data[1]
-                            print("ok")
-                        else:
-                            print("insert your own:")
-                            uinput3 = input()
-                            data = [curpos, uinput3]
-                            self.__csv_writer(self.__rfilepath, data)
-                            self.__dictdb[curpos] = data[1]
-                            print("ok")
+                    Matcher.__response_handler(curpos, mlist)
