@@ -2,31 +2,11 @@
 import csv
 import os
 import re
-import tempfile
-import zipfile
 from difflib import SequenceMatcher
 import openpyxl
 import xlrd
 from xlsxwriter import Workbook
 from openpyxl import Workbook
-
-
-def fix_xlsx(in_file):
-    zin = zipfile.ZipFile(in_file, 'r')
-    if 'xl/SharedStrings.xml' in zin.namelist():
-        tmpfd, tmp = tempfile.mkstemp(dir=os.path.dirname(in_file))
-        os.close(tmpfd)
-
-        with zipfile.ZipFile(tmp, 'w') as zout:
-            for item in zin.infolist():
-                if item.filename == 'xl/SharedStrings.xml':
-                    zout.writestr('xl/sharedStrings.xml', zin.read(item.filename))
-                else:
-                    zout.writestr(item, zin.read(item.filename))
-
-        zin.close()
-        os.remove(in_file)
-        os.rename(tmp, in_file)
 
 
 class Matcher:
@@ -35,7 +15,7 @@ class Matcher:
     __dictdb = {}  # drugs dict
     __dictallbd = {}  # garbage dict
     __directory = "C:/Users/4r4r5/Desktop/reports/"  # directory to work with
-    __reportsdirectory = 'C:/Users/4r4r5/Desktop/reports_result/'  # directory to save reports
+    __reportsdirectory = "C:/Users/4r4r5/Desktop/reports_result/"  # directory to save reports
     __files = os.listdir(__directory)
 
     @staticmethod
@@ -111,11 +91,7 @@ class Matcher:
     def __csv_from_excel(filename, datapath):  # read from datapath; write to filename
         try:
             if (datapath[-4:]) == "xlsx":
-                try:
-                    wb = openpyxl.load_workbook(datapath)
-                except KeyError:
-                    fix_xlsx(filename)
-                    wb = openpyxl.load_workbook(datapath)
+                wb = openpyxl.load_workbook(datapath)
                 filenames = []
                 sheets = wb.sheetnames
                 for sheet in sheets:
@@ -131,7 +107,7 @@ class Matcher:
                         f.close()
                 return filenames
             elif (datapath[-4:]) == ".xls":
-                wb = xlrd.open_workbook(datapath)
+                wb = xlrd.open_workbook(datapath, encoding_override="cp1251")
                 sheetlist = wb.sheet_names()
                 filenames = []
                 for sheet in sheetlist:
@@ -160,7 +136,7 @@ class Matcher:
         Matcher.__reportsdirectory = directory
 
     @staticmethod
-    def match(rpath, wpath):  # read form rpath and write to wpath with renamed drugs
+    def __match(rpath, wpath):  # read form rpath and write to wpath with renamed drugs
         with open(rpath, "r", newline="") as file:
             reader = csv.reader(file, delimiter=';', quotechar='"')
             for row2 in reader:
@@ -185,15 +161,21 @@ class Matcher:
                         if len(mlist) == 0:
                             Matcher.__csv_writer(Matcher.__rfilepath2, [curpos])
                             Matcher.__dictallbd[curpos] = curpos
-                        if len(mlist) != 0:
+                        elif mlist[0][0] > 0.975:
+                            row2[i] = mlist[0][1]
+                            data = [curpos, mlist[0][1]]
+                            Matcher.__csv_writer(Matcher.__rfilepath, data)
+                        elif len(mlist) != 0:
                             mlist.sort(reverse=True)
                             Matcher.__response_handler(curpos, mlist)
+                            if curpos in Matcher.__dictdb:
+                                row2[i] = Matcher.__dictdb[curpos]
                 Matcher.__csv_writer(wpath, row2)
 
     @staticmethod
     def __exelwriter(csvfile):  # creates same named as csvfile xlsx and write data to it
         wb = Workbook(Matcher.__reportsdirectory + csvfile[:-3] + '.xlsx')
-        ws = wb.create_sheet("kaban")
+        ws = wb.create_sheet("Sheet")
         with open(csvfile, 'rt', newline="") as f:
             reader = csv.reader(f, delimiter=';')
             for subarray in reader:
@@ -210,13 +192,12 @@ class Matcher:
             for row2 in reader:
                 self.__dictallbd[row2[0]] = row2[0]
         for file in self.__files:
-            # print(file[-4:])
             filenames = Matcher.__csv_from_excel(file,
                                                  self.__directory + file)  # for files from directory creates csv copy
             for filenm in filenames:  # for files from created list creates result files with renamed drugs
                 with open(filenm[:-4] + "res" + ".csv", 'tw', newline=''):  # and writes result to xslx
                     w = filenm[:-4] + "res" + ".csv"
-                    self.match(filenm, w)
+                    self.__match(filenm, w)
                     self.__exelwriter(w)
             for filenm in filenames:  # deletes temporary files
                 w = filenm[:-4] + "res" + ".csv"
