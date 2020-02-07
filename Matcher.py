@@ -7,11 +7,12 @@ import openpyxl
 import xlrd
 from xlsxwriter import Workbook
 from openpyxl import Workbook
+import Widgets
 
 
 class Matcher:
     __rfilepath = "C:/Users/4r4r5/Desktop/Препараты.csv"  # drugs filepath
-    __rfilepath2 = "C:/Users/4r4r5/Desktop/allbd.csv"  # garbage filepath
+    __rfilepath2 = "‪C:/Users/4r4r5/Desktop/allbd.csv"  # garbage filepath
     __dictdb = {}  # drugs dict
     __dictallbd = {}  # garbage dict
     __directory = "C:/Users/4r4r5/Desktop/reports/"  # directory to work with
@@ -52,38 +53,32 @@ class Matcher:
     @staticmethod
     def __response_handler(curpos, mlist):
         try:
+            ww = Widgets.Widgets()
             while len(mlist) < 4:
                 mlist.append([0, "Error"])
-            print(curpos, " = ", Matcher.__dictdb[mlist[0][1]], "?")
-            uinput1 = input()
+            uinput1 = ww.showDialog1(curpos, Matcher.__dictdb[mlist[0][1]])
             if uinput1 == "y":
                 data = [curpos, Matcher.__dictdb[mlist[0][1]]]
                 Matcher.__csv_writer(Matcher.__rfilepath, data)
                 Matcher.__dictdb[curpos] = data[1]
-                print("ok")
             elif uinput1 == "garb":
                 Matcher.__csv_writer(Matcher.__rfilepath2, [curpos])
                 Matcher.__dictallbd[curpos] = curpos
-                print("added to garbage")
             else:
                 dictemp = {"1": Matcher.__dictdb[mlist[1][1]],
                            "2": Matcher.__dictdb[mlist[2][1]],
                            "3": Matcher.__dictdb[mlist[3][1]]}
-                print("choose one: \n", Matcher.__dictdb[mlist[1][1]], '\n', Matcher.__dictdb[mlist[2][1]], '\n',
-                      Matcher.__dictdb[mlist[3][1]])
-                uinput2 = input()
+                uinput2 = ww.showDialog2(Matcher.__dictdb[mlist[1][1]], Matcher.__dictdb[mlist[2][1]],
+                                         Matcher.__dictdb[mlist[3][1]])
                 if uinput2 == "1" or uinput2 == "2" or uinput2 == "3":
                     data = [curpos, dictemp.get(uinput2)]
                     Matcher.__csv_writer(Matcher.__rfilepath, data)
                     Matcher.__dictdb[curpos] = data[1]
-                    print("ok")
                 else:
-                    print("insert your own:")
-                    uinput3 = input()
+                    uinput3 = ww.showDialog()
                     data = [curpos, uinput3]
                     Matcher.__csv_writer(Matcher.__rfilepath, data)
                     Matcher.__dictdb[curpos] = data[1]
-                    print("ok")
         except IndexError:
             print("list out of bonds")
 
