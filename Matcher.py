@@ -10,8 +10,8 @@ from openpyxl import Workbook
 
 
 class Matcher:
-    __rfilepath = "Препараты.csv"  # drugs filepath
-    __rfilepath2 = "allbd.csv"  # garbage filepath
+    __rfilepath = "C:/Users/4r4r5/Desktop/Препараты.csv"  # drugs filepath
+    __rfilepath2 = "C:/Users/4r4r5/Desktop/allbd.csv"  # garbage filepath
     __dictdb = {}  # drugs dict
     __dictallbd = {}  # garbage dict
     __directory = "C:/Users/4r4r5/Desktop/reports/"  # directory to work with
@@ -134,6 +134,14 @@ class Matcher:
     @staticmethod
     def setreportsdirectory(directory):
         Matcher.__reportsdirectory = directory
+
+    @staticmethod
+    def setdrugsfilepath(directory):
+        Matcher.__rfilepath = directory
+
+    @staticmethod
+    def setgarbagefilepath(directory):
+        Matcher.__rfilepath2 = directory
 
     @staticmethod
     def __match(rpath, wpath):  # read form rpath and write to wpath with renamed drugs
