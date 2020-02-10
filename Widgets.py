@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtWidgets import QInputDialog, QWidget
+from PyQt5.QtWidgets import QInputDialog, QWidget, QMessageBox
 
 
 class Widgets(QWidget):
@@ -23,3 +23,9 @@ class Widgets(QWidget):
         text, ok = QInputDialog.getText(self, 'Input Dialog', "Insert our own:")
         if ok:
             return str(text)
+
+    @staticmethod
+    def showError(filenm):
+        msg = QMessageBox()
+        msg.setText(filenm + "not renamed")
+        msg.exec_()

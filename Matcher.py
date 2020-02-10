@@ -182,6 +182,7 @@ class Matcher:
         with open(csvfile, 'rt', newline="") as f:
             reader = csv.reader(f, delimiter=';')
             for subarray in reader:
+                subarray.insert(0, csvfile[:-3])
                 ws.append(subarray)
         wb.save(Matcher.__reportsdirectory + csvfile[:-3] + '.xlsx')
 
@@ -194,18 +195,25 @@ class Matcher:
             reader = csv.reader(file, delimiter=';', skipinitialspace=True)
             for row2 in reader:
                 self.__dictallbd[row2[0]] = row2[0]
+        errors = []
         for file in self.__files:
-            filenames = Matcher.__csv_from_excel(file,
-                                                 self.__directory + file)  # for files from directory creates csv copy
-            for filenm in filenames:  # for files from created list creates result files with renamed drugs
-                with open(filenm[:-4] + "res" + ".csv", 'tw', newline=''):  # and writes result to xslx
+            try:
+                filenames = Matcher.__csv_from_excel(file,
+                                                     self.__directory + file)  # for files from directory creates csv
+                # copy
+                for filenm in filenames:  # for files from created list creates result files with renamed drugs
+
+                    with open(filenm[:-4] + "res" + ".csv", 'tw', newline=''):  # and writes result to xslx
+                        w = filenm[:-4] + "res" + ".csv"
+                        self.__match(filenm, w)
+                        self.__exelwriter(w)
                     w = filenm[:-4] + "res" + ".csv"
-                    self.__match(filenm, w)
-                    self.__exelwriter(w)
-            for filenm in filenames:  # deletes temporary files
-                w = filenm[:-4] + "res" + ".csv"
-                os.remove(filenm)
-                os.remove(w)
+                    os.remove(filenm)
+                    os.remove(w)
+            except KeyError:
+                errors.append(file)
+        for error in errors:
+            Widgets.Widgets.showError(error)
 
     def createbd(self, rfilepath1):  # add drugs from filepath1 to drugs dict
         with open(self.__rfilepath, "r", newline="") as file:
