@@ -11,16 +11,20 @@ import Widgets
 
 
 class Matcher:
-    __rfilepath = "C:/Users/4r4r5/Desktop/Препараты.csv"  # drugs filepath
-    __rfilepath2 = "‪C:/Users/4r4r5/Desktop/allbd.csv"  # garbage filepath
+    def __init__(self, directory, reportsdirectory, rfilepath, rfilepath2):
+        self.__directory = directory
+        self.__reportsdirectory = reportsdirectory
+        self.__rfilepath = rfilepath
+        self.__rfilepath2 = rfilepath2
+
     __dictdb = {}  # drugs dict
     __dictallbd = {}  # garbage dict
-    __directory = "C:/Users/4r4r5/Desktop/reports/"  # directory to work with
-    __reportsdirectory = "C:/Users/4r4r5/Desktop/reports_result/"  # directory to save reports
-    __files = os.listdir(__directory)
+
+    def __listd(self):  # files from directory list
+        return os.listdir(self.__directory)
 
     @staticmethod
-    def __csv_writer(path, data):
+    def __csv_writer(path, data):  # write data to path
         with open(path, "a", newline='') as csv_file:
             writer = csv.writer(csv_file, delimiter=';')
             writer.writerow(data)
@@ -51,36 +55,25 @@ class Matcher:
             return False
 
     @staticmethod
-    def __response_handler(curpos, mlist):
-        try:
-            ww = Widgets.Widgets()
-            while len(mlist) < 4:
-                mlist.append([0, "Error"])
-            uinput1 = ww.showDialog1(curpos, Matcher.__dictdb[mlist[0][1]])
-            if uinput1 == "y":
-                data = [curpos, Matcher.__dictdb[mlist[0][1]]]
-                Matcher.__csv_writer(Matcher.__rfilepath, data)
-                Matcher.__dictdb[curpos] = data[1]
-            elif uinput1 == "garb":
-                Matcher.__csv_writer(Matcher.__rfilepath2, [curpos])
-                Matcher.__dictallbd[curpos] = curpos
-            else:
-                dictemp = {"1": Matcher.__dictdb[mlist[1][1]],
-                           "2": Matcher.__dictdb[mlist[2][1]],
-                           "3": Matcher.__dictdb[mlist[3][1]]}
-                uinput2 = ww.showDialog2(Matcher.__dictdb[mlist[1][1]], Matcher.__dictdb[mlist[2][1]],
-                                         Matcher.__dictdb[mlist[3][1]])
-                if uinput2 == "1" or uinput2 == "2" or uinput2 == "3":
-                    data = [curpos, dictemp.get(uinput2)]
-                    Matcher.__csv_writer(Matcher.__rfilepath, data)
-                    Matcher.__dictdb[curpos] = data[1]
-                else:
-                    uinput3 = ww.showDialog()
-                    data = [curpos, uinput3]
-                    Matcher.__csv_writer(Matcher.__rfilepath, data)
-                    Matcher.__dictdb[curpos] = data[1]
-        except IndexError:
-            print("list out of bonds")
+    def setrfilepath(filepath, filepath2):
+        Matcher.__rfilepath = filepath
+        Matcher.__rfilepath2 = filepath2
+
+    @staticmethod
+    def setdirectory(directory):
+        Matcher.__directory = directory
+
+    @staticmethod
+    def setreportsdirectory(directory):
+        Matcher.__reportsdirectory = directory
+
+    @staticmethod
+    def setdrugsfilepath(directory):
+        Matcher.__rfilepath = directory
+
+    @staticmethod
+    def setgarbagefilepath(directory):
+        Matcher.__rfilepath2 = directory
 
     @staticmethod
     def __csv_from_excel(filename, datapath):  # read from datapath; write to filename
@@ -117,29 +110,38 @@ class Matcher:
         except UnicodeDecodeError:
             print(datapath)
 
-    @staticmethod
-    def setrfilepath(filepath, filepath2):
-        Matcher.__rfilepath = filepath
-        Matcher.__rfilepath2 = filepath2
+    def __response_handler(self, curpos, mlist):  # answers for responses
+        try:
+            ww = Widgets.Widgets()
+            while len(mlist) < 4:
+                mlist.append([0, "Error"])
+            uinput1 = ww.showDialog1(curpos, Matcher.__dictdb[mlist[0][1]])
+            if uinput1 == "y":
+                data = [curpos, Matcher.__dictdb[mlist[0][1]]]
+                Matcher.__csv_writer(self.__rfilepath, data)
+                Matcher.__dictdb[curpos] = data[1]
+            elif uinput1 == "garb":
+                Matcher.__csv_writer(self.__rfilepath2, [curpos])
+                Matcher.__dictallbd[curpos] = curpos
+            else:
+                dictemp = {"1": Matcher.__dictdb[mlist[1][1]],
+                           "2": Matcher.__dictdb[mlist[2][1]],
+                           "3": Matcher.__dictdb[mlist[3][1]]}
+                uinput2 = ww.showDialog2(Matcher.__dictdb[mlist[1][1]], Matcher.__dictdb[mlist[2][1]],
+                                         Matcher.__dictdb[mlist[3][1]])
+                if uinput2 == "1" or uinput2 == "2" or uinput2 == "3":
+                    data = [curpos, dictemp.get(uinput2)]
+                    Matcher.__csv_writer(self.__rfilepath, data)
+                    Matcher.__dictdb[curpos] = data[1]
+                else:
+                    uinput3 = ww.showDialog()
+                    data = [curpos, uinput3]
+                    Matcher.__csv_writer(self.__rfilepath, data)
+                    Matcher.__dictdb[curpos] = data[1]
+        except IndexError:
+            print("list out of bonds")
 
-    @staticmethod
-    def setdirectory(directory):
-        Matcher.__directory = directory
-
-    @staticmethod
-    def setreportsdirectory(directory):
-        Matcher.__reportsdirectory = directory
-
-    @staticmethod
-    def setdrugsfilepath(directory):
-        Matcher.__rfilepath = directory
-
-    @staticmethod
-    def setgarbagefilepath(directory):
-        Matcher.__rfilepath2 = directory
-
-    @staticmethod
-    def __match(rpath, wpath):  # read form rpath and write to wpath with renamed drugs
+    def __match(self, rpath, wpath):  # read form rpath and write to wpath with renamed drugs
         with open(rpath, "r", newline="") as file:
             reader = csv.reader(file, delimiter=';', quotechar='"')
             for row2 in reader:
@@ -150,6 +152,12 @@ class Matcher:
                         row2[i] = word
                     temp = re.sub(r"[#()./|i*®^ї'%і_\-$!~=\"]", "", word.lower())
                     curpos = temp.strip()
+                    # if curpos in Matcher.__dictdb:
+                    #     if Matcher.__dictdb[curpos] == "Check":
+                    #         curpos += row2[i + 1]
+                    #         row2[i+1] = ""
+                    #         temp = re.sub(r"[#()./|i*®^ї'%і_\-$!~=\"]", "",curpos.lower())
+                    #         curpos = temp.strip()
                     if curpos in Matcher.__dictdb:
                         row2[i] = Matcher.__dictdb[curpos]
                     elif Matcher.__is_digit(curpos) or curpos == "" or (
@@ -162,29 +170,28 @@ class Matcher:
                             if a > 0.6:
                                 mlist.append([a, k])
                         if len(mlist) == 0:
-                            Matcher.__csv_writer(Matcher.__rfilepath2, [curpos])
+                            Matcher.__csv_writer(self.__rfilepath2, [curpos])
                             Matcher.__dictallbd[curpos] = curpos
                         elif mlist[0][0] > 0.975:
                             row2[i] = mlist[0][1]
                             data = [curpos, mlist[0][1]]
-                            Matcher.__csv_writer(Matcher.__rfilepath, data)
+                            Matcher.__csv_writer(self.__rfilepath, data)
                         elif len(mlist) != 0:
                             mlist.sort(reverse=True)
-                            Matcher.__response_handler(curpos, mlist)
+                            Matcher.__response_handler(self, curpos, mlist)
                             if curpos in Matcher.__dictdb:
                                 row2[i] = Matcher.__dictdb[curpos]
                 Matcher.__csv_writer(wpath, row2)
 
-    @staticmethod
-    def __exelwriter(csvfile):  # creates same named as csvfile xlsx and write data to it
-        wb = Workbook(Matcher.__reportsdirectory + csvfile[:-3] + '.xlsx')
+    def __exelwriter(self, csvfile):  # creates same named as csvfile xlsx and write data to it
+        wb = Workbook(self.__reportsdirectory + csvfile[:-3] + '.xlsx')
         ws = wb.create_sheet("Sheet")
         with open(csvfile, 'rt', newline="") as f:
             reader = csv.reader(f, delimiter=';')
             for subarray in reader:
                 subarray.insert(0, csvfile[:-3])
                 ws.append(subarray)
-        wb.save(Matcher.__reportsdirectory + csvfile[:-3] + '.xlsx')
+        wb.save(self.__reportsdirectory + csvfile[:-3] + '.xlsx')
 
     def rename_drugs(self):  # unites some methods:
         with open(self.__rfilepath, "r", newline="") as file:  # create drugs dict
@@ -196,17 +203,19 @@ class Matcher:
             for row2 in reader:
                 self.__dictallbd[row2[0]] = row2[0]
         errors = []
-        for file in self.__files:
+        for file in self.__listd():
             try:
                 filenames = Matcher.__csv_from_excel(file,
                                                      self.__directory + file)  # for files from directory creates csv
                 # copy
                 for filenm in filenames:  # for files from created list creates result files with renamed drugs
-
                     with open(filenm[:-4] + "res" + ".csv", 'tw', newline=''):  # and writes result to xslx
                         w = filenm[:-4] + "res" + ".csv"
-                        self.__match(filenm, w)
-                        self.__exelwriter(w)
+                        try:
+                            self.__match(filenm, w)
+                            self.__exelwriter(w)
+                        except Exception as q:
+                            print(q)
                     w = filenm[:-4] + "res" + ".csv"
                     os.remove(filenm)
                     os.remove(w)
@@ -232,4 +241,4 @@ class Matcher:
                     for i in self.__dictdb:
                         mlist.append([SequenceMatcher(None, curpos, i).ratio(), i])
                     mlist.sort(reverse=True)
-                    Matcher.__response_handler(curpos, mlist)
+                    Matcher.__response_handler(self, curpos, mlist)
