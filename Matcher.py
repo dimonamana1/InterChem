@@ -152,12 +152,6 @@ class Matcher:
                         row2[i] = word
                     temp = re.sub(r"[#()./|i*®^ї'%і_\-$!~=\"]", "", word.lower())
                     curpos = temp.strip()
-                    # if curpos in Matcher.__dictdb:
-                    #     if Matcher.__dictdb[curpos] == "Check":
-                    #         curpos += row2[i + 1]
-                    #         row2[i+1] = ""
-                    #         temp = re.sub(r"[#()./|i*®^ї'%і_\-$!~=\"]", "",curpos.lower())
-                    #         curpos = temp.strip()
                     if curpos in Matcher.__dictdb:
                         row2[i] = Matcher.__dictdb[curpos]
                     elif Matcher.__is_digit(curpos) or curpos == "" or (
@@ -172,7 +166,7 @@ class Matcher:
                         if len(mlist) == 0:
                             Matcher.__csv_writer(self.__rfilepath2, [curpos])
                             Matcher.__dictallbd[curpos] = curpos
-                        elif mlist[0][0] > 0.975:
+                        elif mlist[0][0] > 0.985:
                             row2[i] = mlist[0][1]
                             data = [curpos, mlist[0][1]]
                             Matcher.__csv_writer(self.__rfilepath, data)
@@ -184,12 +178,12 @@ class Matcher:
                 Matcher.__csv_writer(wpath, row2)
 
     def __exelwriter(self, csvfile):  # creates same named as csvfile xlsx and write data to it
-        wb = Workbook(self.__reportsdirectory + csvfile[:-3] + '.xlsx')
+        wb = Workbook(self.__reportsdirectory + csvfile[:-4] + '.xlsx')
         ws = wb.create_sheet("Sheet")
         with open(csvfile, 'rt', newline="") as f:
             reader = csv.reader(f, delimiter=';')
             for subarray in reader:
-                subarray.insert(0, csvfile[:-3])
+                subarray.append(csvfile[:-3])
                 ws.append(subarray)
         wb.save(self.__reportsdirectory + csvfile[:-3] + '.xlsx')
 
@@ -209,16 +203,15 @@ class Matcher:
                                                      self.__directory + file)  # for files from directory creates csv
                 # copy
                 for filenm in filenames:  # for files from created list creates result files with renamed drugs
-                    with open(filenm[:-4] + "res" + ".csv", 'tw', newline=''):  # and writes result to xslx
-                        w = filenm[:-4] + "res" + ".csv"
+                    filenameres = (filenm[:-3] if filenm[:-3] == "xls" else filenm[:-4]) + ".csv"
+                    with open(filenameres, 'tw', newline=''):  # and writes result to xslx
                         try:
-                            self.__match(filenm, w)
-                            self.__exelwriter(w)
+                            self.__match(filenm, filenameres)
+                            self.__exelwriter(filenameres)
                         except Exception as q:
                             print(q)
-                    w = filenm[:-4] + "res" + ".csv"
                     os.remove(filenm)
-                    os.remove(w)
+                    os.remove(filenameres)
             except KeyError:
                 errors.append(file)
         for error in errors:

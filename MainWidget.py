@@ -10,7 +10,7 @@ class MainWidgets(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle('Renamer')
-        self.setWindowIcon(QIcon('12.jpg'))
+        self.setWindowIcon(QIcon('12.ico'))
         self.mas = ["C:/Users/4r4r5/Desktop/reports/",  # paths list
                     "C:/Users/4r4r5/Desktop/reports_result/",
                     "C:/Users/4r4r5/Desktop/Препараты.csv", "C:/Users/4r4r5/Desktop/allbd.csv"]
@@ -25,7 +25,7 @@ class MainWidgets(QtWidgets.QMainWindow):
     def showComplete():  # complete message
         msg = QMessageBox()
         msg.setWindowTitle('Renamer')
-        msg.setWindowIcon(QIcon('12.jpg'))
+        msg.setWindowIcon(QIcon('12.ico'))
         msg.setText("Complete!")
         msg.exec_()
 

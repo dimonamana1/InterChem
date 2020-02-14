@@ -8,7 +8,7 @@ class Widgets(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Renamer')
-        self.setWindowIcon(QIcon('12.jpg'))
+        self.setWindowIcon(QIcon('12.ico'))
 
     def showDialog1(self, key, value):  # 1st step response dialog
         text, ok = QInputDialog.getText(self, 'Input Dialog', key + " = " + value)
@@ -31,7 +31,7 @@ class Widgets(QWidget):
     def showError(filenm):  # error message
         msg = QMessageBox()
         msg.setWindowTitle('Renamer')
-        msg.setWindowIcon(QIcon('12.jpg'))
+        msg.setWindowIcon(QIcon('12.ico'))
         msg.setText(filenm + " not renamed")
         msg.exec_()
 
@@ -39,6 +39,6 @@ class Widgets(QWidget):
     def showFNF():  # error message
         msg = QMessageBox()
         msg.setWindowTitle('Renamer')
-        msg.setWindowIcon(QIcon('12.jpg'))
+        msg.setWindowIcon(QIcon('12.ico'))
         msg.setText("File or directory does not exist, please try again")
         msg.exec_()

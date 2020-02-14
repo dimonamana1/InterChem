@@ -1,13 +1,44 @@
 <component name="ProjectDictionaryState">
   <dictionary name="Surface">
     <words>
+      <w>allbd</w>
+      <w>createbd</w>
+      <w>csvfile</w>
       <w>curpos</w>
+      <w>datapath</w>
+      <w>dictallbd</w>
       <w>dictdb</w>
+      <w>dictdbres</w>
       <w>dictemp</w>
+      <w>dirlist</w>
+      <w>exelwriter</w>
+      <w>filenameres</w>
+      <w>filenm</w>
+      <w>filetype</w>
+      <w>getall</w>
+      <w>listd</w>
       <w>mlist</w>
+      <w>mmatcher</w>
+      <w>myapp</w>
+      <w>ppath</w>
+      <w>renamer</w>
+      <w>reportsdirectory</w>
       <w>rfilepath</w>
+      <w>rownum</w>
+      <w>setdirectory</w>
+      <w>setdrugsfilepath</w>
+      <w>setgarbagefilepath</w>
+      <w>setreportsdirectory</w>
+      <w>setrfilepath</w>
+      <w>sheetlist</w>
+      <w>shitcode</w>
+      <w>tmpfd</w>
       <w>uinput</w>
       <w>wfilepath</w>
+      <w>wpath</w>
+      <w>xlsx</w>
+      <w>xslx</w>
+      <w>zout</w>
     </words>
   </dictionary>
 </component>
