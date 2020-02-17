@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-from Matcher import Matcher
-
-matcher = Matcher("Препараты1.csv", "1.csv", "Препараты1.csv")
-matcher.match()
+import sys
+from design import *
+import MainWidget
+app = QtWidgets.QApplication(sys.argv)
+myapp = MainWidget.MainWidgets()
+myapp.show()
+sys.exit(app.exec_())
